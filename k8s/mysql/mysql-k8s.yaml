@@ -65,6 +65,7 @@ data:
   init-db.sql: |
     CREATE DATABASE IF NOT EXISTS catalog;
     CREATE DATABASE IF NOT EXISTS `order`;
+    CREATE DATABASE IF NOT EXISTS `auth`;
 
     -- 사용자 생성이 이미 되어 있지 않다면 생성
     CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY '1234';

@@ -134,3 +134,81 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_container_registry_policy
   ]
 }
+
+# EKS Node Group 보안 그룹 (예시)
+resource "aws_security_group" "eks_nodes_sg" {
+  name        = "${var.cluster_name}-eks-nodes-sg"
+  description = "EKS Node Group security group"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-eks-nodes-sg"
+  }
+}
+
+# Redis Security Group
+resource "aws_security_group" "redis_sg" {
+  name        = "${var.cluster_name}-redis-sg"
+  description = "Allow access to Redis from EKS nodes"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "Allow Redis access from EKS nodes"
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    # EKS 클러스터의 Node Security Group을 지정하여 통신을 허용
+    security_groups = [aws_security_group.eks_nodes_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-redis-sg"
+  }
+}
+
+# MySQL Security Group
+resource "aws_security_group" "mysql_sg" {
+  name        = "${var.cluster_name}-mysql-sg"
+  description = "Allow access to MySQL from EKS nodes"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "Allow MySQL access from EKS nodes"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    security_groups = [aws_security_group.eks_nodes_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-mysql-sg"
+  }
+}

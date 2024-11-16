@@ -61,4 +61,4 @@ spec:
             - name: SPRING_CLOUD_CONFIG_URI
               value: http://config-service:8888
             - name: SPRING_REDIS_HOST
-              value: 172.20.204.110
+              value: polar-radis.default.svc.local

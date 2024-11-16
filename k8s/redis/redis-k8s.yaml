@@ -13,6 +13,7 @@ spec:
       labels:
         db: polar-redis
     spec:
+      hostname: polar-redis
       containers:
         - name: polar-redis
           image: redis:latest
@@ -23,6 +24,17 @@ spec:
             limits:
               cpu: 200m
               memory: 100Mi
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: default
+type: Opaque
+data:
+  redis-password: MTIzNA==  # 'password1234'를 base64 인코딩한 값
 
 ---
 

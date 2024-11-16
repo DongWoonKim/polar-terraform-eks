@@ -1,1 +1,11 @@
+# Ignore .terraform directory
 .terraform/
+
+# Ignore all files by default
+*
+
+# Allow main.tf
+!main.tf
+
+# Keep the .gitignore file itself
+!.gitignore
