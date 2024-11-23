@@ -163,16 +163,16 @@ resource "aws_security_group" "eks_nodes_sg" {
 # Redis Security Group
 resource "aws_security_group" "redis_sg" {
   name        = "${var.cluster_name}-redis-sg"
-  description = "Allow access to Redis from EKS nodes"
+  description = "Allow access to Redis from all internal pods in the VPC"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    description = "Allow Redis access from EKS nodes"
+    description = "Allow Redis access from all internal VPC traffic"
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    # EKS 클러스터의 Node Security Group을 지정하여 통신을 허용
-    security_groups = [aws_security_group.eks_nodes_sg.id]
+    # VPC CIDR 범위 허용
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {
