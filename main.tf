@@ -68,6 +68,31 @@ resource "aws_instance" "public_front_ec2" {
   }
 }
 
+# MySQL Security Group
+resource "aws_security_group" "mysql_sg" {
+  name        = "${var.cluster_name}-mysql-sg"
+  description = "Allow access to MySQL from EKS nodes"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description     = "Allow MySQL access from EKS nodes"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eks_nodes_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-mysql-sg"
+  }
+}
 
 # Private Subnet EC2 생성 (MySQL)
 resource "aws_instance" "mysql_ec2" {
@@ -81,10 +106,17 @@ resource "aws_instance" "mysql_ec2" {
 
   user_data = <<-EOF
     #!/bin/bash
+    # 업데이트 및 MySQL 설치
     sudo apt update -y
     sudo apt install -y mysql-server
+
+    # MySQL 서비스 활성화 및 시작
     sudo systemctl enable mysql
     sudo systemctl start mysql
+
+    # MySQL root 비밀번호 설정
+    sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '1234';"
+    sudo mysql -e "FLUSH PRIVILEGES;"
   EOF
 
   tags = {
@@ -255,31 +287,5 @@ resource "aws_security_group" "front_service_sg" {
 
   tags = {
     Name = "Public-FRONT-EC2-SG"
-  }
-}
-
-# MySQL Security Group
-resource "aws_security_group" "mysql_sg" {
-  name        = "${var.cluster_name}-mysql-sg"
-  description = "Allow access to MySQL from EKS nodes"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    description     = "Allow MySQL access from EKS nodes"
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_nodes_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.cluster_name}-mysql-sg"
   }
 }
