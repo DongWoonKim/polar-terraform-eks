@@ -22,10 +22,10 @@ module "vpc" {
   private_subnets = var.private_subnet_cidrs
   public_subnets  = var.public_subnet_cidrs
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
-  enable_dns_hostnames = true    
-  enable_dns_support   = true 
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
   # EKS를 위한 태그 추가
   public_subnet_tags = {
@@ -36,7 +36,7 @@ module "vpc" {
   private_subnet_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"           = "1"
-  }   
+  }
 
   tags = {
     Environment = var.environment
@@ -46,11 +46,11 @@ module "vpc" {
 
 # EC2 인스턴스 생성
 resource "aws_instance" "public_front_ec2" {
-  ami           = var.ami_id                # 사용하려는 AMI ID
-  instance_type = var.instance_type         # EㅌC2 인스턴스 타입 (예: "t2.micro")
+  ami           = var.ami_id                   # 사용하려는 AMI ID
+  instance_type = var.instance_type            # EㅌC2 인스턴스 타입 (예: "t2.micro")
   subnet_id     = module.vpc.public_subnets[0] # Public Subnet 중 첫 번째 서브넷 사용
 
-  associate_public_ip_address = true       # Public IP 할당 (필수)
+  associate_public_ip_address = true # Public IP 할당 (필수)
 
   security_groups = [aws_security_group.front_service_sg.id] # 보안 그룹 연결
 
@@ -153,7 +153,7 @@ resource "aws_eks_cluster" "main" {
   version  = var.kubernetes_version
 
   vpc_config {
-    subnet_ids = slice(module.vpc.private_subnets, 1, length(module.vpc.private_subnets))
+    subnet_ids              = slice(module.vpc.private_subnets, 1, length(module.vpc.private_subnets))
     endpoint_private_access = true
     endpoint_public_access  = true
   }
@@ -249,7 +249,7 @@ resource "aws_security_group" "front_service_sg" {
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"          # 모든 아웃바운드 트래픽 허용
+    protocol    = "-1" # 모든 아웃바운드 트래픽 허용
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -265,10 +265,10 @@ resource "aws_security_group" "mysql_sg" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    description = "Allow MySQL access from EKS nodes"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
+    description     = "Allow MySQL access from EKS nodes"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
     security_groups = [aws_security_group.eks_nodes_sg.id]
   }
 
