@@ -69,61 +69,61 @@ resource "aws_instance" "public_front_ec2" {
 }
 
 # MySQL Security Group
-resource "aws_security_group" "mysql_sg" {
-  name        = "${var.cluster_name}-mysql-sg"
-  description = "Allow access to MySQL from EKS nodes"
-  vpc_id      = module.vpc.vpc_id
+# resource "aws_security_group" "mysql_sg" {
+#   name        = "${var.cluster_name}-mysql-sg"
+#   description = "Allow access to MySQL from EKS nodes"
+#   vpc_id      = module.vpc.vpc_id
 
-  ingress {
-    description     = "Allow MySQL access from EKS nodes"
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_nodes_sg.id]
-  }
+#   ingress {
+#     description     = "Allow MySQL access from EKS nodes"
+#     from_port       = 3306
+#     to_port         = 3306
+#     protocol        = "tcp"
+#     security_groups = [aws_security_group.eks_nodes_sg.id]
+#   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  tags = {
-    Name = "${var.cluster_name}-mysql-sg"
-  }
-}
+#   tags = {
+#     Name = "${var.cluster_name}-mysql-sg"
+#   }
+# }
 
 # Private Subnet EC2 생성 (MySQL)
-resource "aws_instance" "mysql_ec2" {
-  ami           = var.ami_id
-  instance_type = var.instance_type
-  subnet_id     = module.vpc.private_subnets[0]
+# resource "aws_instance" "mysql_ec2" {
+#   ami           = var.ami_id
+#   instance_type = var.instance_type
+#   subnet_id     = module.vpc.private_subnets[0]
 
-  associate_public_ip_address = false
+#   associate_public_ip_address = false
 
-  security_groups = [aws_security_group.mysql_sg.id]
+#   security_groups = [aws_security_group.mysql_sg.id]
 
-  user_data = <<-EOF
-    #!/bin/bash
-    # 업데이트 및 MySQL 설치
-    sudo apt update -y
-    sudo apt install -y mysql-server
+#   user_data = <<-EOF
+#     #!/bin/bash
+#     # 업데이트 및 MySQL 설치
+#     sudo apt update -y
+#     sudo apt install -y mysql-server
 
-    # MySQL 서비스 활성화 및 시작
-    sudo systemctl enable mysql
-    sudo systemctl start mysql
+#     # MySQL 서비스 활성화 및 시작
+#     sudo systemctl enable mysql
+#     sudo systemctl start mysql
 
-    # MySQL root 비밀번호 설정
-    sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '1234';"
-    sudo mysql -e "FLUSH PRIVILEGES;"
-  EOF
+#     # MySQL root 비밀번호 설정
+#     sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '1234';"
+#     sudo mysql -e "FLUSH PRIVILEGES;"
+#   EOF
 
-  tags = {
-    Name        = "MySQL-EC2"
-    Environment = var.environment
-  }
-}
+#   tags = {
+#     Name        = "MySQL-EC2"
+#     Environment = var.environment
+#   }
+# }
 
 
 # EKS 관련
@@ -193,11 +193,6 @@ resource "aws_eks_cluster" "main" {
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy
   ]
-
-  tags = {
-    Name        = "EKS-EC2"
-    Environment = var.environment
-  }
 }
 
 # EKS Node Group
@@ -220,6 +215,11 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_iam_role_policy_attachment.eks_container_registry_policy
   ]
+
+  tags = {
+    Name        = "EKS-EC2"
+    Environment = var.environment
+  }
 }
 
 # EKS Node Group 보안 그룹 (예시)
