@@ -89,7 +89,7 @@ resource "aws_security_group" "front_service_sg" {
 # EC2 인스턴스 생성
 resource "aws_instance" "public_front_ec2" {
   ami           = var.ami_id                   # 사용하려는 AMI ID
-  instance_type = var.instance_type            # EC2 인스턴스 타입 (예: "t2.micro")
+  instance_type = var.instance_type            # EㅌC2 인스턴스 타입 (예: "t2.micro")
   subnet_id     = module.vpc.public_subnets[0] # Public Subnet 중 첫 번째 서브넷 사용
 
   associate_public_ip_address = true # Public IP 할당 (필수)
